@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.io.*;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
@@ -124,9 +125,11 @@ public class G1ServerEventHandler implements CMAppEventHandler {
 				}
 			}
 			break;
+		//로그아웃 처리 	
 		case CMSessionEvent.LOGOUT:
 			//System.out.println("["+se.getUserName()+"] logs out.");
 			printMessage("["+se.getUserName()+"] logs out.\n");
+			map.remove(userName); //사용자를 지워준다.
 			break;
 		case CMSessionEvent.REQUEST_SESSION_INFO:
 			//System.out.println("["+se.getUserName()+"] requests session information.");
@@ -204,98 +207,167 @@ public class G1ServerEventHandler implements CMAppEventHandler {
 	}
 	
 	//박지성
-		String hint[] = {
-				"1. 아시아입니다.",
-				"2. 인구수가 1억 미만입니다.",
-				"3. 반도국가입니다.",
-				"4. 된장이 유명합니다.",
-				"5. 김치가 유명합니다.",
-				"6. 대통령이 문재인입니다. 시발...."
-		};
-		G1Country country1 = new G1Country(1,"한국", hint);
-		G1Country country2 = new G1Country(2,"일본", hint);
-		G1Country country3 = new G1Country(3,"증극", hint);
+	String genres[] = {"나라", "구기종목", "음식"};
+	
+	String userName=null;
+	HashMap<String, Client> map = new HashMap<>();
+	ArrayList<Client> array = new ArrayList<>();
+	boolean flag;//처음 선택을 위하여 
+	String answer=null;
+	
+	private void processDummyEvent(CMEvent cme)
+	{
 
-		HashMap<String, Client> map = new HashMap<>();
-		int count=0;
-		ArrayList<Client> array = new ArrayList<>();
+		CMDummyEvent due = (CMDummyEvent) cme;
+		String msg = due.getDummyInfo();
+		userName = due.getSender();
 		
-		private void processDummyEvent(CMEvent cme)
-		{
-//			Iterator<Entry<String, Client>> entries = map.entrySet().iterator();
-//			while(entries.hasNext()) {
-//				Map.Entry<String,Client> entry = entries.next();
-//				if(entry.getKey()==)
-//			}
-			CMDummyEvent due = (CMDummyEvent) cme;
-			String msg = due.getDummyInfo();
-			String userName = due.getSender();
-			
-			if(!map.containsKey(userName)) {
-				Client newClient = new Client(userName);
-				map.put(userName, newClient);
-			}
-			
-			count = map.get(userName).getCount();
-			int score = map.get(userName).getScore();
-			if(count==0) { 
-				due.setDummyInfo("나라문제 입니다.");
+		if(!map.containsKey(userName)) {
+			Client newClient = new Client(userName);
+			map.put(userName, newClient);
+			flag =false;
+		}
+		
+		int count = map.get(userName).getCount();
+		int score = map.get(userName).getScore();
+		String[] hint = map.get(userName).getHint();
+		
+		int n=0;
+		int random=0;
+		Random random1 = new Random();
+		random1.setSeed(System.nanoTime());
+		
+		if(count==0) {
+			if(!flag) {
+				due.setDummyInfo("1.나라 2.구기종목 3.음식\n하나를 고르시오");
 				m_serverStub.send(due, userName);
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				due.setDummyInfo(hint[count]);
-				map.get(userName).setCount(count+1);
-				m_serverStub.send(due, userName);
-			}
-			
-			else {
-				switch(msg) {
+				flag = true;
+			}else {
+				n = Integer.parseInt(msg);
 				
-				case "hint":
-					if(count>5) {
-						due.setDummyInfo("힌트를 모두 소진하였습니다.");
+				random = (int) (random1.nextInt(2));
+				if(n==1) {
+					if(random==0) {
+						Genre gen1 = new Genre("독일");
+						due.setDummyInfo(gen1.choice.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen1.choice.hint);
+						map.get(userName).setAnswer(gen1.choice.name); 
 						m_serverStub.send(due, userName);
-						break;
 					}
+					else if(random==1) {
+						Genre gen1 = new Genre("러시아");
+						due.setDummyInfo(gen1.choice.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen1.choice.hint);
+						map.get(userName).setAnswer(gen1.choice.name); 
+						m_serverStub.send(due, userName);
+					}
+					else{
+						Genre gen1 = new Genre("한국");
+						due.setDummyInfo(gen1.choice.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen1.choice.hint);
+						map.get(userName).setAnswer(gen1.choice.name); 
+						m_serverStub.send(due, userName);
+					}
+					
+				}
+				else if(n==2) {
+					if(random==0) {
+						Genre2 gen2 = new Genre2("배구");
+						due.setDummyInfo(gen2.choice2.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen2.choice2.hint);
+						map.get(userName).setAnswer(gen2.choice2.name); 
+						m_serverStub.send(due, userName);
+					}
+					else if(random==1) {
+						Genre2 gen2 = new Genre2("탁구");
+						due.setDummyInfo(gen2.choice2.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen2.choice2.hint);
+						map.get(userName).setAnswer(gen2.choice2.name);
+						m_serverStub.send(due, userName);
+					}
+					else{
+						Genre2 gen2 = new Genre2("야구");
+						due.setDummyInfo(gen2.choice2.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen2.choice2.hint);
+						map.get(userName).setAnswer(gen2.choice2.name);
+						m_serverStub.send(due, userName);
+					}
+					
+				}
+				else if(n==3) {
+					if(random==0) {
+						Genre3 gen3 = new Genre3("떡볶이");
+						due.setDummyInfo(gen3.choice3.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen3.choice3.hint);
+						map.get(userName).setAnswer(gen3.choice3.name);
+						m_serverStub.send(due, userName);
+					}
+					else if(random==1) {
+						Genre3 gen3 = new Genre3("마라탕");
+						due.setDummyInfo(gen3.choice3.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen3.choice3.hint);
+						map.get(userName).setAnswer(gen3.choice3.name);
+						m_serverStub.send(due, userName);
+					}
+					else{
+						Genre3 gen3 = new Genre3("파스타");
+						due.setDummyInfo(gen3.choice3.hint[count]);
+						map.get(userName).setCount(count+1);
+						map.get(userName).setHint(gen3.choice3.hint);
+						map.get(userName).setAnswer(gen3.choice3.name);
+						m_serverStub.send(due, userName);
+					}
+					
+				}
+				
+			}
+		}
+		else {
+			System.out.println(answer);
+			if(msg.equals("hint")){
+				if(count>4) {
+					due.setDummyInfo("힌트를 모두 소진하였습니다.");
+					m_serverStub.send(due, userName);
+				}else {
 					due.setDummyInfo(hint[count]);
 					map.get(userName).setCount(count+1);
 					map.get(userName).setScore(score-1);
 					m_serverStub.send(due, userName);
-					break;
-				case "한국"://정답일 경우
-					due.setDummyInfo("축하드립니다!! 맞추셨어요!!"+" "+userName+"님의 점수는 "+map.get(userName).getScore()+"입니다.");
-					m_serverStub.send(due, userName);
-					
-					array.add(map.get(userName));
-					Collections.sort(array);
-					StringBuilder sb = new StringBuilder();
-					
-					for(int i=0; i<array.size(); i++) {
-						sb.append((i+1)+"등 "+array.get(i).getUserName()+" : "+array.get(i).getScore()+"점\n");
-					}
-					
-					due.setDummyInfo(sb.toString());
-					m_serverStub.send(due, userName);
-					map.remove(userName);
-					break;
-				default:
-					due.setDummyInfo("틀렸엉~~~~");
-					map.get(userName).setScore(score-2);
-					m_serverStub.send(due,  userName);
-					
 				}
 			}
-		//System.out.println("session("+due.getHandlerSession()+"), group("+due.getHandlerGroup()+")");
-		//printMessage("session("+due.getHandlerSession()+"), group("+due.getHandlerGroup()+")\n");
-		//System.out.println("dummy msg: "+due.getDummyInfo());
-		//printMessage("["+due.getSender()+"] sent a dummy msg: "+due.getDummyInfo()+"\n");
-		
-		return;
-	}
+			else if(msg.equals(answer)) {
+				due.setDummyInfo("축하드립니다!! 맞추셨어요!!"+" "+userName+"님의 점수는 "+map.get(userName).getScore()+"입니다.");
+				m_serverStub.send(due, userName);
+				
+				array.add(map.get(userName));
+				Collections.sort(array);
+				StringBuilder sb = new StringBuilder();
+				
+				for(int i=0; i<array.size(); i++) {
+					sb.append((i+1)+"등 "+array.get(i).getUserName()+" : "+array.get(i).getScore()+"점\n");
+				}
+				
+				due.setDummyInfo(sb.toString());
+				m_serverStub.send(due, userName);
+				map.remove(userName);
+			}
+			else {
+				due.setDummyInfo("틀렸엉~~~~");
+				map.get(userName).setScore(score-2);
+				m_serverStub.send(due,  userName);
+				
+			}
+		}
+	return;
+}
 	
 	private void processUserEvent(CMEvent cme)
 	{

@@ -1345,7 +1345,7 @@ public class CMWinClient extends JFrame {
 			return;
 		}
 		
-		printMessage("====== test CMDummyEvent in current group\n");
+		//printMessage("====== test CMDummyEvent in current group\n");생략
 
 		strInput = JOptionPane.showInputDialog("Input Message: ");
 		if(strInput == null) return;
@@ -1358,7 +1358,7 @@ public class CMWinClient extends JFrame {
 		m_clientStub.send(due, "SERVER");
 		due = null;
 		
-		printMessage("======\n");
+		//printMessage("======\n");생략
 	}
 
 	public void testDatagram()

@@ -3,7 +3,29 @@ public class Client implements Comparable<Client>{
 	private int count;
 	private int score;
 	private String userName;
+	private String[] hint;
+	private String answer;
 	
+	public String getAnswer() {
+		return answer;
+	}
+
+
+	public void setAnswer(String answer) {
+		this.answer = answer;
+	}
+
+
+	public String[] getHint() {
+		return hint;
+	}
+
+
+	public void setHint(String[] hint) {
+		this.hint = hint;
+	}
+
+
 	Client(String userName){
 		this.userName = userName;
 		this.score = 20;

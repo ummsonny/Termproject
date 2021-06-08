@@ -552,9 +552,9 @@ public class Game1EventHandler implements CMAppEventHandler{
 		CMDummyEvent due = (CMDummyEvent)cme;
 		printMessage(due.getDummyInfo()+"\n");
 		//System.out.println("session("+due.getHandlerSession()+"), group("+due.getHandlerGroup()+")");
-		printMessage("session("+due.getHandlerSession()+"), group("+due.getHandlerGroup()+")\n");
+		//printMessage("session("+due.getHandlerSession()+"), group("+due.getHandlerGroup()+")\n");//이것 생략
 		//System.out.println("dummy msg: "+due.getDummyInfo());
-		printMessage("["+due.getSender()+"] sent a dummy msg: "+due.getDummyInfo()+"\n");
+		//printMessage("["+due.getSender()+"] sent a dummy msg: "+due.getDummyInfo()+"\n");//이거 생략
 		return;
 	}
 	
