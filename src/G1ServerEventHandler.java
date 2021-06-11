@@ -207,13 +207,13 @@ public class G1ServerEventHandler implements CMAppEventHandler {
 	}
 	
 	//박지성
-	String genres[] = {"나라", "구기종목", "음식"};
 	
-	String userName=null;
-	HashMap<String, Client> map = new HashMap<>();
-	ArrayList<Client> array = new ArrayList<>();
-	boolean flag;//처음 선택을 위하여 
-	String answer=null;
+	String userName=null;//클라이언트 이름 받기 위하여
+	HashMap<String, Client> map = new HashMap<>();//서버에서 클라이언트를 관리하는 맵
+	ArrayList<Client> array = new ArrayList<>();//순위를 나타내기 위하여
+	boolean flag;//클라이언트가 처음 3가지 보기중 1개를 고르고 게임이 바로 진행하기 위한 플래그
+	String answer=null;//클라이언트가 고른 문제의 정답을 담는다.
+	
 	
 	private void processDummyEvent(CMEvent cme)
 	{
@@ -228,12 +228,13 @@ public class G1ServerEventHandler implements CMAppEventHandler {
 			flag =false;
 		}
 		
+		//서버가 관리하는 클라이언트의 점수,힌트개수,문제에 맞는 힌트를 관리한다.
 		int count = map.get(userName).getCount();
 		int score = map.get(userName).getScore();
 		String[] hint = map.get(userName).getHint();
 		
-		int n=0;
-		int random=0;
+		int n=0;//3가지 보기중 무엇을 골랐는지 저장
+		int random=0;//클라이언트가 보기를 골랐다면 그안에서 카테고리는 서버가 클라이언트에게 랜덤으로 배정한다.
 		Random random1 = new Random();
 		random1.setSeed(System.nanoTime());
 		
@@ -243,9 +244,15 @@ public class G1ServerEventHandler implements CMAppEventHandler {
 				m_serverStub.send(due, userName);
 				flag = true;
 			}else {
-				n = Integer.parseInt(msg);
-				
+				try{
+					n = Integer.parseInt(msg);
+				}catch(NumberFormatException e) {
+					due.setDummyInfo("정수를 입력하세요!");
+					m_serverStub.send(due,  userName);
+					return;
+				}
 				random = (int) (random1.nextInt(2));
+				
 				if(n==1) {
 					if(random==0) {
 						Genre gen1 = new Genre("독일");
@@ -331,7 +338,6 @@ public class G1ServerEventHandler implements CMAppEventHandler {
 			}
 		}
 		else {
-			System.out.println(answer);
 			if(msg.equals("hint")){
 				if(count>4) {
 					due.setDummyInfo("힌트를 모두 소진하였습니다.");
@@ -343,13 +349,25 @@ public class G1ServerEventHandler implements CMAppEventHandler {
 					m_serverStub.send(due, userName);
 				}
 			}
-			else if(msg.equals(answer)) {
-				due.setDummyInfo("축하드립니다!! 맞추셨어요!!"+" "+userName+"님의 점수는 "+map.get(userName).getScore()+"입니다.");
+			else if(msg.equals(map.get(userName).getAnswer())) {
+				due.setDummyInfo("축하드립니다!! 정답입니다~! "+" "+userName+"님의 점수는 "+map.get(userName).getScore()+"입니다.");
 				m_serverStub.send(due, userName);
+//				boolean flag2 = false;
+//				
+//				if(!array.isEmpty()) {
+//					for(int i=0; i<array.size(); i++) {
+//						if(array.get(i).getUserName().equals(userName) && (array.get(i).getScore()<map.get(userName).getScore())) {
+//							array.get(i).setScore(map.get(userName).getScore());
+//						}
+//					}
+//				}else {
+//					
+//				}
 				
 				array.add(map.get(userName));
+				
 				Collections.sort(array);
-				StringBuilder sb = new StringBuilder();
+				StringBuilder sb = new StringBuilder("====전체 등수====\n");
 				
 				for(int i=0; i<array.size(); i++) {
 					sb.append((i+1)+"등 "+array.get(i).getUserName()+" : "+array.get(i).getScore()+"점\n");
@@ -360,7 +378,7 @@ public class G1ServerEventHandler implements CMAppEventHandler {
 				map.remove(userName);
 			}
 			else {
-				due.setDummyInfo("틀렸엉~~~~");
+				due.setDummyInfo("틀렸습니다. 다시 시도하세요!!!!");
 				map.get(userName).setScore(score-2);
 				m_serverStub.send(due,  userName);
 				

@@ -37,7 +37,6 @@ public class Client implements Comparable<Client>{
 		return userName;
 	}
 
-
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
@@ -73,6 +72,8 @@ public class Client implements Comparable<Client>{
         return 0;
 
 	}
+
+
 
 
 }
